@@ -1,0 +1,82 @@
+package main
+
+import (
+	"os"
+	"io"
+	"fmt"
+	"bufio"
+	"bytes"
+)
+
+/* ================> Design of the IncrementTable:
+		All of the different options for the input/output
+		variables.
+   =============================================> */
+type IncrementTable struct {
+	XTYT, XTYF, XFYT, XFYF int
+}
+
+func ReadInTrainData( trainString string, trainBuff []byte ) {
+	linesFromTrain, error := readLines( trainString )
+	var err error
+	fmt.Println(trainString)
+	trainFile, err := os.Open(trainString)
+	fmt.Printf( "TrainFile is: %v, err is %v \n", trainFile, err )
+	trainFile.Read(trainBuff)
+	fmt.Printf( "TrainBuff is %v \n", trainBuff )
+}
+
+func ReadInTestData( testString string, testBuff []byte ) {
+	fmt.Println( testString )
+	testFile, err := os.Open( testString )
+	fmt.Printf( "TestFile is: %v, err is %v \n", testFile, err )
+	testFile.Read(testBuff)
+	fmt.Printf( "TestBuff is %v \n", testBuff ) 
+}
+
+func readLines(path string) (lines []string, err error) {
+    var (
+        file *os.File
+        part []byte
+        prefix bool
+    )
+    if file, err = os.Open(path); err != nil {
+        return
+    }
+    defer file.Close()
+
+    reader := bufio.NewReader(file)
+    buffer := bytes.NewBuffer(make([]byte, 0))
+    for {
+        if part, prefix, err = reader.ReadLine(); err != nil {
+            break
+        }
+        buffer.Write(part)
+        if !prefix {
+            lines = append(lines, buffer.String())
+            buffer.Reset()
+        }
+    }
+    if err == io.EOF {
+        err = nil
+    }
+    return
+}
+
+/*========> Design of the Input 
+
+	Example:
+		"go run nbayes.go <train-file> <test-file>"
+
+===============================>*/
+func main() {
+	trainBuff := make( []byte, 1024 )
+	testBuff := make( []byte, 1024 )
+
+	// ReadBytes from bufio should play a big part
+	ReadInTrainData( os.Args[1], trainBuff )
+	ReadInTestData( os.Args[2], testBuff )
+	// TrainData( )
+	// TestData( )
+	fmt.Println("Just printing something.")
+}
