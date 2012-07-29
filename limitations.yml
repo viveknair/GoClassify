@@ -1,6 +1,0 @@
-Limitations:
-		Only on types defined within
-		this current package
-			(which means that you cant do it on
-			 basic types and external packages)
-
