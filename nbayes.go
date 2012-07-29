@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"bufio"
 	"bytes"
+	"strings"
 
-	// "text/scanner"
 	"strconv"
 )
 
@@ -39,36 +39,39 @@ func ReadInTrainData( trainString string ) {
 	trainData := make([]IncrementTable, numVariables)
 	fmt.Printf("trainData is %v \n", trainData )
 
-	for i := 0; i < numVariables; i ++  {
-		var s scanner.Scanner
-		s.Init(linesFromTrain[i])
-		tok := s.Scan()
-		// =============> Somehow get the 'Y' value
-		yValue := 1;
-		for tok != scanner.EOF {
-			xValue, xErr :=  strconv.ParseInt(tok, 0, 32)
-			IncrementInputVariable( &trainData, i, xValue, yValue )
-			tok = s.Scan()
+	for i := 2; i < int(numRows) + 2; i ++  {
+		currentRow := linesFromTrain[i]
+		tokenizedString := strings.FieldsFunc( currentRow, delimiter )
+		yValue, yErr := strconv.ParseInt(tokenizedString[numVariables], 0, 32)
+		fmt.Printf("yValue is %v, yErr is %v \n", yValue, yErr )
+		for j := 0; j < int(numVariables); j ++ {
+			xValue, xErr := strconv.ParseInt(tokenizedString[j], 0, 32)
+			fmt.Printf("xValue is %v, xErr is %v \n", xValue, xErr )
+			IncrementInputVariable( &trainData, j,  xValue, yValue )
 		}
 	}
+	fmt.Printf("trainData is %#v \n", trainData )
 }
 
-func IncrementInputVariable( trainData *[]IncrementTable, index, xVal, yVal int ) {
-	if ( xVal == 1 && yVal == 1 ) {
-		trainData[index].XTYT ++
-	} else if ( xVal == 1 && yVal == 0 ) {
-		trainData[index].XTYF ++
-	} else if ( xVal == 0 && yVal == 1 ){
-		trainData[index].XFYT ++
-	} else ( xVal == 0 && yVal == 0 ){
-		trainData[index].XFYF ++
+func delimiter( r rune ) bool {
+	return r == ':' || r == ' '
+}
+
+func IncrementInputVariable( trainData *[]IncrementTable, index int, xVal, yVal int64 ) {
+	if xVal == 1 && yVal == 1 {
+		(*trainData)[index].XTYT ++
+	} else if xVal == 1 && yVal == 0 {
+		(*trainData)[index].XTYF ++
+	} else if xVal == 0 && yVal == 1 {
+		(*trainData)[index].XFYT ++
+	} else {
+		(*trainData)[index].XFYF ++
 	}
 }
 
 func ReadInTestData( testString string ) {
 	linesFromTest, err := readLines( testString )
 	fmt.Printf("linesFromTest is %v, err is %v \n", linesFromTest, err )
-
 }
 
 func readLines(path string) (lines []string, err error) {
